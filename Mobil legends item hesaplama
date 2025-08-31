@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>MLBB Build Hesaplama</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0a0a0a;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 { color: #ffcc00; }
+    .kategori { margin-top: 20px; font-size: 20px; color: #ff6600; }
+    .item {
+      margin: 5px;
+      padding: 10px;
+      background: #222;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-block;
+    }
+    .item:hover { background: #444; }
+    #result {
+      margin-top: 20px;
+      padding: 15px;
+      background: #111;
+      border-radius: 10px;
+    }
+    #langBtn {
+      margin: 15px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 8px;
+      background: #ff6600;
+      color: white;
+      border: none;
+    }
+    footer {
+      margin-top: 40px;
+      font-size: 14px;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+  <h1>⚔️ MLBB Build Hesaplama ⚔️</h1>
+  <button id="langBtn" onclick="degistirDil()">İngilizceye Geç</button>
+  <p>6 item seç ve build’ini hesapla!</p>
+
+  <div class="kategori">🗡️ Physical Items</div>
+  <div id="physical"></div>
+
+  <div class="kategori">🔮 Magic Items</div>
+  <div id="magic"></div>
+
+  <div class="kategori">🛡️ Defense Items</div>
+  <div id="defense"></div>
+
+  <div class="kategori">👟 Movement Items</div>
+  <div id="movement"></div>
+
+  <div class="kategori">🌲 Jungle Items</div>
+  <div id="jungle"></div>
+
+  <div class="kategori">🤝 Roam Items</div>
+  <div id="roam"></div>
+
+  <button onclick="hesapla()">✅ Build Hesapla</button>
+
+  <div id="result"></div>
+
+  <footer>EMİR MERT KILINÇ YAPIMIDIR</footer>
+
+  <script>
+    let dil = "tr"; // tr = Türkçe, en = İngilizce
+    const items = {
+      "Blade of Despair": {attack:160, hp:0, magic:0, defense:0, tr:"Umutsuzluğun Kılıcı"},
+      "Endless Battle": {attack:65, hp:250, magic:0, defense:0, tr:"Sonsuz Dövüş"},
+      "Malefic Roar": {attack:60, hp:0, magic:0, defense:0, tr:"Kötücül Gürültü"},
+      "Hunter Strike": {attack:80, hp:0, magic:0, defense:0, tr:"Avcı Darbesi"},
+      "Sea Halberd": {attack:80, hp:0, magic:0, defense:0, tr:"Deniz Mızrağı"},
+      "Windtalker": {attack:40, hp:0, magic:0, defense:0, tr:"Rüzgar Konuşanı"},
+      "Scarlet Phantom": {attack:30, hp:0, magic:0, defense:0, tr:"Kızıl Hayalet"},
+      "Berserker's Fury": {attack:65, hp:0, magic:0, defense:0, tr:"Berserker Öfkesi"},
+      "Great Dragon Spear": {attack:75, hp:0, magic:0, defense:0, tr:"Büyük Ejderha Mızrağı"},
+
+      "Blood Wings": {attack:0, hp:500, magic:150, defense:0, tr:"Kan Kanatları"},
+      "Holy Crystal": {attack:0, hp:0, magic:100, defense:0, tr:"Kutsal Kristal"},
+      "Genius Wand": {attack:0, hp:0, magic:75, defense:0, tr:"Deha Asası"},
+      "Divine Glaive": {attack:0, hp:0, magic:65, defense:0, tr:"Kutsal Mızrak"},
+      "Glowing Wand": {attack:0, hp:0, magic:75, defense:0, tr:"Parlayan Asa"},
+      "Clock of Destiny": {attack:0, hp:615, magic:60, defense:0, tr:"Kader Saati"},
+      "Lightning Truncheon": {attack:0, hp:300, magic:75, defense:0, tr:"Yıldırım Asa"},
+      "Ice Queen Wand": {attack:0, hp:0, magic:75, defense:0, tr:"Buz Kraliçe Asası"},
+      "Enchanted Talisman": {attack:0, hp:250, magic:50, defense:0, tr:"Büyülü Talisman"},
+
+      "Immortality": {attack:0, hp:800, magic:0, defense:40, tr:"Ölümsüzlük"},
+      "Athena's Shield": {attack:0, hp:900, magic:0, defense:62, tr:"Athena'nın Kalkanı"},
+      "Dominance Ice": {attack:0, hp:500, magic:0, defense:70, tr:"Hüküm Buz"},
+      "Oracle": {attack:0, hp:850, magic:0, defense:42, tr:"Kahin"},
+      "Antique Cuirass": {attack:0, hp:920, magic:0, defense:54, tr:"Antik Zırh"},
+      "Brute Force Breastplate": {attack:0, hp:770, magic:0, defense:45, tr:"Zorlayıcı Zırh"},
+      "Cursed Helmet": {attack:0, hp:1200, magic:25, defense:0, tr:"Lanli Miğfer"},
+      "Twilight Armor": {attack:0, hp:1200, magic:0, defense:50, tr:"Alacakaranlık Zırhı"},
+
+      "Warrior Boots": {attack:0, hp:22, magic:0, defense:22, tr:"Savaşçı Çizmesi"},
+      "Tough Boots": {attack:0, hp:0, magic:0, defense:18, tr:"Sağlam Çizme"},
+      "Arcane Boots": {attack:0, hp:0, magic:15, defense:0, tr:"Gizemli Çizme"},
+      "Magic Shoes": {attack:0, hp:0, magic:0, defense:0, tr:"Büyü Ayakkabısı"},
+      "Swift Boots": {attack:0, hp:0, magic:0, defense:0, tr:"Hızlı Çizme"},
+
+      "Raptor Machete": {attack:30, hp:0, magic:0, defense:0, tr:"Yırtıcı Palası"},
+      "Star Shard": {attack:0, hp:0, magic:30, defense:0, tr:"Yıldız Parçacığı"},
+      "Beast Killer": {attack:0, hp:500, magic:0, defense:20, tr:"Canavar Katili"},
+
+      "Courage Mask": {attack:0, hp:700, magic:0, defense:0, tr:"Cesaret Maskesi"},
+      "Shadow Mask": {attack:0, hp:700, magic:0, defense:0, tr:"Gölge Maskesi"},
+      "Awe Mask": {attack:0, hp:700, magic:0, defense:0, tr:"Hayranlık Maskesi"}
+    };
+
+    const kategoriler = {
+      physical:["Blade of Despair","Endless Battle","Malefic Roar","Hunter Strike","Sea Halberd","Windtalker","Scarlet Phantom","Berserker's Fury","Great Dragon Spear"],
+      magic:["Blood Wings","Holy Crystal","Genius Wand","Divine Glaive","Glowing Wand","Clock of Destiny","Lightning Truncheon","Ice Queen Wand","Enchanted Talisman"],
+      defense:["Immortality","Athena's Shield","Dominance Ice","Oracle","Antique Cuirass","Brute Force Breastplate","Cursed Helmet","Twilight Armor"],
+      movement:["Warrior Boots","Tough Boots","Arcane Boots","Magic Shoes","Swift Boots"],
+      jungle:["Raptor Machete","Star Shard","Beast Killer"],
+      roam:["Courage Mask","Shadow Mask","Awe Mask"]
+    };
+
+    let secilenler = [];
+
+    function olusturButonlar() {
+      for(let kategori in kategoriler){
+        const div = document.getElementById(kategori);
+        div.innerHTML = "";
+        kategoriler[kategori].forEach(item => {
+          let btn = document.createElement("div");
+          btn.className = "item";
+          btn.textContent = dil=="tr"? items[item].tr : item;
+          btn.onclick = () => {
+            if(secilenler.length<6){
+              secilenler.push(item);
+              btn.style.background="#006600";
+            }else{
+              alert("❌ En fazla 6 item seçebilirsin!");
+            }
+          };
+          div.appendChild(btn);
+        });
+      }
+    }
+
+    function degistirDil(){
+      dil = dil=="tr"?"en":"tr";
+      document.getElementById("langBtn").textContent = dil=="tr"?"İngilizceye Geç":"Türkçeye Geç";
+      olusturButonlar();
+    }
+
+    function hesapla(){
+      let stats={attack:0,hp:0,magic:0,defense:0};
+      secilenler.forEach(i=>{
+        stats.attack += items[i].attack;
+        stats.hp += items[i].hp;
+        stats.magic += items[i].magic;
+        stats.defense += items[i].defense;
+      });
+      document.getElementById("result").innerHTML = `
+        <h2>${dil=="tr"?"Build Sonuçları":"Build Results"}</h2>
+        <p>${dil=="tr"?"Seçilen itemler":"Selected items"}: ${secilenler.map(i=>dil=="tr"?items[i].tr:i).join(", ")}</p>
+        <p>Attack: ${stats.attack}</p>
+        <p>HP: ${stats.hp}</p>
+        <p>Magic Power: ${stats.magic}</p>
+        <p>Defense: ${stats.defense}</p>
+      `;
+    }
+
+    olusturButonlar();
+  </script>
+</body>
+</html>
